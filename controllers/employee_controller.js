@@ -1,15 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const studentModel = mongoose.model('student')
-const bcrypt = require('bcrypt')
+const employeeModel = mongoose.model('employee');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
-const {JWT_SECRET} = require('../utility/config')
+const { JWT_SECRET } = require('../utility/config')
 
-const checkConn = (req, res) => {
+const checkConnemp = (req, res) => {
     res.status(200).json({ message: 'connection done successfully' })
 }
 
-const addStudent = async (req, res) => {
+const addEmployee = async (req, res) => {
 
     try {
         const data = req.body;
@@ -19,9 +19,9 @@ const addStudent = async (req, res) => {
         }
         console.log(data.password)
         const hashPassword = await bcrypt.hash(data.password, 10);
-        const newStudent = new studentModel({ name: data.name, std: data.std, mobile: data.mobile, email: data.email, password: hashPassword,userType: data.userType});
+        const newEmployee = new employeeModel({ firstName: data.firstName, lastName: data.lastName, mobile: data.mobile, address: data.address, email: data.email, password: hashPassword, userType: 2 });
 
-        await newStudent.save();
+        await newEmployee.save();
         return res.status(200).json({ status: true, data: { message: "data added successfully" } })
     }
     catch (error) {
@@ -30,11 +30,11 @@ const addStudent = async (req, res) => {
     }
 }
 
-const updateStudent = async (req, res) => {
+const updateEmployee = async (req, res) => {
     try {
         const studentId = req.params.id;
         const data = req.body;
-        const updateStudent = await studentModel.findByIdAndUpdate(studentId, data, { new: true });
+        const updateStudent = await employeeModel.findByIdAndUpdate(studentId, data, { new: true });
 
         if (!updateStudent) {
             return res.staus(404).json({ staus: true, data: { message: "student id is not found" } })
@@ -47,10 +47,10 @@ const updateStudent = async (req, res) => {
     }
 }
 
-const getAllStudent = async (req, res) => {
+const getAllEmployee = async (req, res) => {
     try {
 
-        const getStudent = await studentModel.find();
+        const getStudent = await employeeModel.find();
 
         if (!getStudent) {
             return res.status(404).json({ staus: false, data: { message: "no student found" } })
@@ -65,14 +65,14 @@ const getAllStudent = async (req, res) => {
     }
 }
 
-const deteleStudent = async (req, res) => {
+const deteleEmployee = async (req, res) => {
     try {
         const studentId = req.params.id;
 
         if (!studentId) {
             return res.status(404).json({ staus: false, data: { message: "student id can not be null or empty" } })
         }
-        await studentModel.findByIdAndDelete(studentId);
+        await employeeModel.findByIdAndDelete(studentId);
 
         return res.status(200).json({ status: true, data: { message: 'user deleted successfully' } })
     }
@@ -82,11 +82,11 @@ const deteleStudent = async (req, res) => {
     }
 }
 
-const validateStudent = async (req, res) => {
+const validatEmployee = async (req, res) => {
     try {
         const data = req.body;
-       // console.log(data);
-        const Student = await studentModel.findOne({email:data.email});
+        // console.log(data);
+        const Student = await employeeModel.findOne({ email: data.email });
         console.log("student", Student);
         if (!Student.email) {
             return res.status(200).json({ staus: false, data: { message: "your id is not registered" } })
@@ -96,10 +96,10 @@ const validateStudent = async (req, res) => {
         }
         const passwordMatch = await bcrypt.compare(data.password, Student.password)
 
-        const token = jwt.sign({user_id:Student.id}, JWT_SECRET)
+        const token = jwt.sign({ user_id: Student.id }, JWT_SECRET)
         if (passwordMatch) {
-            
-            return res.status(200).json({ status: true, data: { message: 'Login student successfully', token:token ,user:Student} })
+
+            return res.status(200).json({ status: true, data: { message: 'Login student successfully', token: token, user: Student } })
         }
         else {
             return res.status(200).json({ status: false, data: { message: 'Incorrect Password ' } })
@@ -111,5 +111,4 @@ const validateStudent = async (req, res) => {
     }
 }
 
-module.exports = { checkConn, addStudent, updateStudent, getAllStudent, deteleStudent, validateStudent }
-
+module.exports = { checkConnemp, addEmployee, updateEmployee, getAllEmployee, deteleEmployee, validatEmployee }
