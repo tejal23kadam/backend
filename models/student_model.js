@@ -20,6 +20,10 @@ const studentSchema = mongoose.Schema({
     password:{
         type:String,
         require:true
+    },
+    userType:{
+        type : Number,
+        require:true
     }
 },{timeStamps:true})
 

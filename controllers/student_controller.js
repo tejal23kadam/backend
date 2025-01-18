@@ -2,6 +2,8 @@ const e = require('express');
 const mongoose = require('mongoose');
 const studentModel = mongoose.model('student')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const {JWT_SECRET} = require('../utility/config')
 
 const checkConn = (req, res) => {
     res.status(200).json({ message: 'connection done successfully' })
@@ -17,7 +19,7 @@ const addStudent = async (req, res) => {
         }
         console.log(data.password)
         const hashPassword = await bcrypt.hash(data.password, 10);
-        const newStudent = new studentModel({ name: data.name, std: data.std, mobile: data.mobile, email: data.email, userId: data.userId, password: hashPassword });
+        const newStudent = new studentModel({ name: data.name, std: data.std, mobile: data.mobile, email: data.email, password: hashPassword,userType: data.userType});
 
         await newStudent.save();
         return res.status(200).json({ status: true, data: { message: "data added successfully" } })
@@ -93,8 +95,11 @@ const validateStudent = async (req, res) => {
             return res.status(200).json({ staus: false, data: { message: "please enter password" } })
         }
         const passwordMatch = await bcrypt.compare(data.password, Student.password)
+
+        const token = jwt.sign({user_id:Student.id}, JWT_SECRET)
         if (passwordMatch) {
-            return res.status(200).json({ status: true, data: { message: 'Login student successfully' } })
+            
+            return res.status(200).json({ status: true, data: { message: 'Login student successfully', token:token ,user:Student} })
         }
         else {
             return res.status(200).json({ status: false, data: { message: 'Incorrect Password ' } })
