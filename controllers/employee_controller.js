@@ -5,21 +5,29 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const { JWT_SECRET } = require('../utility/config')
 
+
 const checkConnemp = (req, res) => {
     res.status(200).json({ message: 'connection done successfully' })
 }
 
 const addEmployee = async (req, res) => {
-
     try {
         const data = req.body;
-
         if (!data) {
             return res.status(404).json({ status: true, data: { message: " data can not be null or empty " } })
         }
         console.log(data.password)
         const hashPassword = await bcrypt.hash(data.password, 10);
-        const newEmployee = new employeeModel({ firstName: data.firstName, lastName: data.lastName, mobile: data.mobile, address: data.address, email: data.email, password: hashPassword, userType: 2 });
+        console.log("req = "+req.file);
+          const newEmployee = new employeeModel({          
+            firstName: data.firstName,
+            lastName: data.lastName,
+            mobile: data.mobile,
+            address: data.address,
+            email: data.email,
+            password: hashPassword,
+            userType: 2
+        });
 
         await newEmployee.save();
         return res.status(200).json({ status: true, data: { message: "data added successfully" } })
@@ -29,6 +37,7 @@ const addEmployee = async (req, res) => {
         return res.status(501).json({ staus: false, data: { message: 'Internal server error', data: error } })
     }
 }
+
 
 const updateEmployee = async (req, res) => {
     try {
